@@ -43,9 +43,9 @@ class ImageLoader:
 
         return (img / 255).astype(np.float32)
 
-    def make_channels_firt(self, img):
+    def make_channels_first(self, img):
         img = np.rollaxis(img, 2, 0)
-
+        return img
 
 @begin.start
 def main():
