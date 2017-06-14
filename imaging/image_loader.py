@@ -47,6 +47,7 @@ class ImageLoader:
         img = np.rollaxis(img, 2, 0)
         return img
 
+
 @begin.start
 def main():
     print("testing data loader")
