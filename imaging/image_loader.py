@@ -40,7 +40,8 @@ class ImageLoader:
             # img = cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)
         else:
             img = scipy.misc.imread(path, grey_scale)
-
+        if img is None:
+            raise RuntimeError("ERROR: {} not found".format(path))
         return (img / 255).astype(np.float32)
 
     def make_channels_first(self, img):
@@ -56,3 +57,4 @@ def main():
     img = il.resize(img, (64, 64))
     print(img.shape)
     # todo: proper unit tests for different image formats
+    img = il.load_image("test_data/missing.jpg")
