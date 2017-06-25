@@ -68,7 +68,7 @@ class ImageLoader:
                     img = cv2.imread(path, cv2.IMREAD_COLOR)
             else:
                 img = scipy.misc.imread(path, grey_scale)
-
+        
         return (img / float(np.iinfo(img.dtype).max)).astype(np.float32)
 
     def make_channels_first(self, img):
@@ -85,3 +85,4 @@ def main():
     img = il.random_rotate(img)
     print(img.shape)
     # todo: proper unit tests for different image formats
+    img = il.load_image("test_data/missing.jpg")
