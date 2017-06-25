@@ -30,7 +30,9 @@ class ImageLoader:
         self._flipper = {0: lambda img: img,
                          1: lambda img: rotate(img, 90),
                          2: lambda img: rotate(img, 180),
-                         3: lambda img: rotate(img, 270)}
+                         3: lambda img: rotate(img, 270),
+                         4: lambda img: np.flipud(img),
+                         5: lambda img: np.fliplr(img)}
 
     def resize(self, img, shape, interpolation=3):
         if HAS_OPENCV:
@@ -47,7 +49,7 @@ class ImageLoader:
         return res
         
     def random_rotate(self, img):
-        return self._flipper[np.random.randint(4)](img)
+        return self._flipper[np.random.randint(6)](img)
         
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
