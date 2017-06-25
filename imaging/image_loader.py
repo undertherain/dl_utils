@@ -3,6 +3,7 @@ import begin
 import errno
 import imp
 import numpy as np
+from skimage.transform import rotate
 
 try:
     imp.find_module('cv2')
@@ -26,7 +27,10 @@ else:
 
 class ImageLoader:
     def __init__(self):
-        pass
+        self._flipper = {0: lambda img: img,
+                         1: lambda img: rotate(img, 90),
+                         2: lambda img: rotate(img, 180),
+                         3: lambda img: rotate(img, 270)}
 
     def resize(self, img, shape, interpolation=3):
         if HAS_OPENCV:
@@ -41,6 +45,9 @@ class ImageLoader:
         pad2 = max(0, pad2)
         res = np.lib.pad(img, ((0, pad1), (0, pad2), (0, 0)), 'constant', constant_values=0)
         return res
+        
+    def random_rotate(self, img):
+        return self._flipper[np.random.randint(4)](img)
         
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
@@ -75,5 +82,6 @@ def main():
     il = ImageLoader()
     img = il.load_image("test_data/ireland.jpg")
     img = il.resize(img, (64, 64))
+    img = il.random_rotate(img)
     print(img.shape)
     # todo: proper unit tests for different image formats
