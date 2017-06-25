@@ -1,4 +1,6 @@
+import os
 import begin
+import errno
 import imp
 import numpy as np
 
@@ -10,6 +12,16 @@ except ImportError:
 else:
     HAS_OPENCV = True
     import cv2
+    
+try:
+    imp.find_module('tifffile')
+except ImportError:
+    HAS_TIFFFILE = False
+    print("No module named 'tifffile'")
+    print("Cannot process .tif format.")
+else:
+    HAS_TIFFFILE = True
+    import tifffile as tiff
 
 
 class ImageLoader:
@@ -29,20 +41,28 @@ class ImageLoader:
         pad2 = max(0, pad2)
         res = np.lib.pad(img, ((0, pad1), (0, pad2), (0, 0)), 'constant', constant_values=0)
         return res
-
+        
     def load_image(self, path, grey_scale=False):
-        # todo: check if file exists, don't return None, raise proper exception
-        if HAS_OPENCV:
-            if grey_scale:
-                img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        if os.path.isfile(path) is False:
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path)
+        
+        img_type = path.split('.')[-1]
+        
+        if img_type in ['tif', 'tiff']:
+            if HAS_TIFFFILE:
+                img = tiff.imread(path)
             else:
-                img = cv2.imread(path, cv2.IMREAD_COLOR)
-            # img = cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)
+                raise ImportError("No module named 'tifffile'")
         else:
-            img = scipy.misc.imread(path, grey_scale)
-        if img is None:
-            raise RuntimeError("ERROR: {} not found".format(path))
-        return (img / 255).astype(np.float32)
+            if HAS_OPENCV:
+                if grey_scale:
+                    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+                else:
+                    img = cv2.imread(path, cv2.IMREAD_COLOR)
+            else:
+                img = scipy.misc.imread(path, grey_scale)
+        
+        return (img / float(np.iinfo(img.dtype).max)).astype(np.float32)
 
     def make_channels_first(self, img):
         img = np.rollaxis(img, 2, 0)
