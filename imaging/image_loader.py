@@ -27,12 +27,12 @@ else:
 
 class ImageLoader:
     def __init__(self):
-        self._flipper = {0: lambda img: img,
-                         1: lambda img: rotate(img, 90),
-                         2: lambda img: rotate(img, 180),
-                         3: lambda img: rotate(img, 270),
-                         4: lambda img: np.flipud(img),
-                         5: lambda img: np.fliplr(img)}
+        self._flipper = {0: lambda img, axes: img,
+                         1: lambda img, axes: np.rot90(m=img, k=1, axes=axes),
+                         2: lambda img, axes: np.rot90(m=img, k=2, axes=axes),
+                         3: lambda img, axes: np.rot90(m=img, k=3, axes=axes),
+                         4: lambda img, axes: np.flipud(img),
+                         5: lambda img, axes: np.fliplr(img)}
 
     def resize(self, img, shape, interpolation=3):
         if HAS_OPENCV:
@@ -48,8 +48,8 @@ class ImageLoader:
         res = np.lib.pad(img, ((0, pad1), (0, pad2), (0, 0)), 'constant', constant_values=0)
         return res
         
-    def random_rotate(self, img):
-        return self._flipper[np.random.randint(6)](img)
+    def random_rotate(self, img, axes=(0, 1)):
+        return self._flipper[np.random.randint(6)](img, axes)
         
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
@@ -74,7 +74,8 @@ class ImageLoader:
         return (img / float(np.iinfo(img.dtype).max)).astype(np.float32)
 
     def make_channels_first(self, img):
-        img = np.rollaxis(img, 2, 0)
+        axes = img.shape
+        img = np.rollaxis(img, axes.index(min(axes)), 0)
         return img
 
 
