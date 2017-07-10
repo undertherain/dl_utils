@@ -29,7 +29,7 @@ class experiment:
             self.best = min(self.history["loss"])
             self.id_epoch_best = np.argmin(self.history["loss"])+1
         self.load_options()
-        self.descr = self.str_arch + "|" + self.str_opt
+        self.descr = self.name + "|" + self.str_arch + "|" + self.str_opt
         if "shape_x_train" in self.params:
             self.descr = str(self.params["shape_x_train"][0]) + "x"+self.descr
 
@@ -61,7 +61,7 @@ class experiment_chainer(experiment):
         self.history["val_loss"] = np.array([i["validation/main/loss"] for i in log])
         # self.history["val_loss"] = np.clip(self.history["val_loss"],a_min=0,a_max=5)
         self.name = path.split("/")[-1]
-        self.str_arch = "dummy chainer arch"
+        self.str_arch = "chnr"
         self.str_opt = "dummy opt"
         super(experiment_chainer, self).__init__(path)
 

@@ -1,6 +1,8 @@
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
+from matplotlib import pyplot as plt
 
 def cmp_experiments(l):
     keys = sorted(l[0].history.keys())
