@@ -26,13 +26,22 @@ else:
 
 
 class ImageLoader:
-    def __init__(self):
+    def __init__(self, roll_step=8):
         self._flipper = {0: lambda img, axes: img,
                          1: lambda img, axes: np.rot90(m=img, k=1, axes=axes),
                          2: lambda img, axes: np.rot90(m=img, k=2, axes=axes),
                          3: lambda img, axes: np.rot90(m=img, k=3, axes=axes),
                          4: lambda img, axes: np.flipud(img),
                          5: lambda img, axes: np.fliplr(img)}
+
+        self._shifter = {0: lambda img, axes: np.roll(img, self._shift_space(img, axes[0]), axis=axes[0]),
+                         1: lambda img, axes: np.roll(img, self._shift_space(img, axes[1]), axis=axes[1])}
+
+        self._roll_step = roll_step
+
+    def _shift_space(self, img, axis):
+        unit_shift = int(img.shape[axis] / self._roll_step)
+        return unit_shift * np.random.randint(unit_shift)
 
     def resize(self, img, shape, interpolation=3):
         if HAS_OPENCV:
@@ -50,6 +59,9 @@ class ImageLoader:
         
     def random_rotate(self, img, axes=(0, 1)):
         return self._flipper[np.random.randint(6)](img, axes)
+
+    def random_shift(self, img, axes=(0, 1)):
+        return self._shifter[np.random.randint(2)](img, axes)
         
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
