@@ -75,10 +75,10 @@ def load_experiments(path_root):
         try:
             if os.path.isfile(os.path.join(path, "log")):
                 exp = experiment_chainer(path)
+                experiments.append(exp)
             else:
                 # exp = experiment_keras(name_exp)
                 pass
-            experiments.append(exp)
         except BaseException as e:
             print(name_exp, "seems to be corrupt ")
             print(e)
