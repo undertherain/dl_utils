@@ -4,6 +4,7 @@ import errno
 import imp
 import numpy as np
 from skimage.transform import rotate
+from scipy.ndimage.filters import gaussian_filter
 
 try:
     imp.find_module('cv2')
@@ -37,10 +38,20 @@ class ImageLoader:
         self._shifter = {0: lambda img, axes: np.roll(img, self._shift_space(img, axes[0]), axis=axes[0]),
                          1: lambda img, axes: np.roll(img, self._shift_space(img, axes[1]), axis=axes[1])}
 
+        self._blurrer = {0: lambda img, axes: self._blur_img(img, axes),
+                         1: lambda img, axes: img}
+
         self._roll_step = roll_step
 
-    def _shift_space(self, img, axis):
-        unit_shift = int(img.shape[axis] / self._roll_step)
+    def _blur_img(self, img, axes):
+        pix = np.random.randint(2, 5)
+        sigma = np.zeros(3, dtype=np.int32)
+        idx = (np.array(list(axes), dtype=np.int32),)
+        sigma[idx] = pix
+        return gaussian_filter(img, sigma=tuple(sigma))
+
+    def _shift_space(self, img, axes):
+        unit_shift = int(img.shape[axes] / self._roll_step)
         return unit_shift * np.random.randint(unit_shift)
 
     def resize(self, img, shape, interpolation=3):
@@ -62,6 +73,9 @@ class ImageLoader:
 
     def random_shift(self, img, axes=(0, 1)):
         return self._shifter[np.random.randint(2)](img, axes)
+
+    def random_blur(self, img, axes=(0, 1), proba=0.2):
+        return self._blurrer[1 if np.random.randint(int(1 / proba)) > 0 else 0](img, axes)
         
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
