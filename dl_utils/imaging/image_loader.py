@@ -43,6 +43,13 @@ class ImageLoader:
 
         self._roll_step = roll_step
 
+    def _mosaic_pad(self, img, axes):
+        pad_axis_width = (img.shape[axes[0]], img.shape[axes[1]])
+        pad_width = [(0, 0), (0, 0), (0, 0)]
+        pad_width[axes[0]] = pad_axis_width
+        pad_width[axes[1]] = pad_axis_width
+        return np.lib.pad(img, pad_width=tuple(pad_width), mode='reflect')
+
     def _blur_img(self, img, axes):
         pix = np.random.randint(2, 5)
         sigma = np.zeros(3, dtype=np.int32)
