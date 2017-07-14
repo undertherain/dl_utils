@@ -56,7 +56,7 @@ class ImageLoader:
         slc[axes[1]] = slice(left2, right2)
         return img[slc]
 
-    def _mosaic_pad(self, img, axes):
+    def mosaic_pad(self, img, axes):
         pad_axis_width = (img.shape[axes[0]], img.shape[axes[1]])
         pad_width = [(0, 0), (0, 0), (0, 0)]
         pad_width[axes[0]] = pad_axis_width
