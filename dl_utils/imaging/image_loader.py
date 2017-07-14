@@ -3,7 +3,7 @@ import begin
 import errno
 import imp
 import numpy as np
-from skimage.transform import rotate
+from scipy.ndimage.interpolation import rotate
 from scipy.ndimage.filters import gaussian_filter
 
 try:
