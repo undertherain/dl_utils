@@ -45,7 +45,18 @@ class ImageLoader:
 
         self._roll_step = roll_step
 
-    def _mosaic_pad(self, img, axes):
+    def center_crop(self, img, axes, new_shape=(64, 64)):
+        old_shape = [img.shape[axes[0]], img.shape[axes[1]]]
+        left1 = np.floor((old_shape[0] - new_shape[0]) / 2.).astype(np.int32)
+        right1 = np.floor((old_shape[0] + new_shape[0]) / 2.).astype(np.int32)
+        left2 = np.floor((old_shape[1] - new_shape[1]) / 2.).astype(np.int32)
+        right2 = np.floor((old_shape[1] + new_shape[1]) / 2.).astype(np.int32)
+        slc = [slice(None)] * len(img.shape)
+        slc[axes[0]] = slice(left1, right1)
+        slc[axes[1]] = slice(left2, right2)
+        return img[slc]
+
+    def mosaic_pad(self, img, axes):
         pad_axis_width = (img.shape[axes[0]], img.shape[axes[1]])
         pad_width = [(0, 0), (0, 0), (0, 0)]
         pad_width[axes[0]] = pad_axis_width
