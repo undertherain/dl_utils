@@ -33,7 +33,9 @@ class ImageLoader:
                          2: lambda img, axes: np.rot90(m=img, k=2, axes=axes),
                          3: lambda img, axes: np.rot90(m=img, k=3, axes=axes),
                          4: lambda img, axes: np.flipud(img),
-                         5: lambda img, axes: np.fliplr(img)}
+                         5: lambda img, axes: np.fliplr(img),
+                         6: lambda img, axes: rotate(np.rot90(m=img, k=np.random.randint(4), axes=axes),
+                                                     angle=15, axes=axes)}
 
         self._shifter = {0: lambda img, axes: np.roll(img, self._shift_space(img, axes[0]), axis=axes[0]),
                          1: lambda img, axes: np.roll(img, self._shift_space(img, axes[1]), axis=axes[1])}
@@ -42,6 +44,13 @@ class ImageLoader:
                          1: lambda img, axes: img}
 
         self._roll_step = roll_step
+
+    def _mosaic_pad(self, img, axes):
+        pad_axis_width = (img.shape[axes[0]], img.shape[axes[1]])
+        pad_width = [(0, 0), (0, 0), (0, 0)]
+        pad_width[axes[0]] = pad_axis_width
+        pad_width[axes[1]] = pad_axis_width
+        return np.lib.pad(img, pad_width=tuple(pad_width), mode='reflect')
 
     def _blur_img(self, img, axes):
         pix = np.random.randint(2, 5)
@@ -69,7 +78,7 @@ class ImageLoader:
         return res
         
     def random_rotate(self, img, axes=(0, 1)):
-        return self._flipper[np.random.randint(6)](img, axes)
+        return self._flipper[np.random.randint(7)](img, axes)
 
     def random_shift(self, img, axes=(0, 1)):
         return self._shifter[np.random.randint(2)](img, axes)
