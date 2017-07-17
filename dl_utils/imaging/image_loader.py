@@ -119,6 +119,12 @@ class ImageLoader:
 
         return (img / float(np.iinfo(img.dtype).max)).astype(np.float32)
 
+    def save_image(self, img, path):
+        if HAS_OPENCV:
+            cv2.imwrite(path, img)
+        else:
+            scipy.misc.imsave(path, img)
+
     def make_channels_first(self, img):
         axes = img.shape
         img = np.rollaxis(img, axes.index(min(axes)), 0)
