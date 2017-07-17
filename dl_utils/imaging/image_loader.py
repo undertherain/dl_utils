@@ -36,7 +36,7 @@ class ImageLoader:
                          4: lambda img, axes: np.flipud(img),
                          5: lambda img, axes: np.fliplr(img),
                          6: lambda img, axes: rotate(np.rot90(m=img, k=np.random.randint(4), axes=axes),
-                                                     angle=15, axes=axes)}
+                                                     angle=15, axes=axes, reshape=False)}
 
         self._scroller = {0: lambda img, axes: np.roll(img, self._scroll_img(img, axes[0]), axis=axes[0]),
                           1: lambda img, axes: np.roll(img, self._scroll_img(img, axes[1]), axis=axes[1])}
