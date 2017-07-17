@@ -3,6 +3,7 @@ import begin
 import errno
 import imp
 import numpy as np
+from scipy.misc import imsave
 from scipy.ndimage.interpolation import rotate
 from scipy.ndimage.filters import gaussian_filter
 from skimage.transform import resize
@@ -141,8 +142,19 @@ def main():
     print("testing data loader")
     il = ImageLoader()
     img = il.load_image("test_data/ireland.jpg")
-    img = il.resize(img, (64, 64))
-    img = il.random_rotate(img)
+    img = il.resize(img, (512, 512))
+    new_shape = (img.shape[0], img.shape[1])
+    img = il.mosaic_pad(img=img, axes=(0, 1))
+    img = il.random_scroll(img=img, axes=(0, 1))
+    img, rot = il.random_rotate(img=img, axes=(0, 1))
+    img = il.random_zoom(img=img, axes=(0, 1), rot=rot)
+    img = il.center_crop(img=img, axes=(0, 1), new_shape=new_shape)
+    img = il.random_blur(img=img, axes=(0, 1), proba=0.2)
+
     print(img.shape)
+    imsave('outfile.jpg', img)
     # todo: proper unit tests for different image formats
-    img = il.load_image("test_data/missing.jpg")
+    try:
+        img = il.load_image("test_data/missing.jpg")
+    except FileNotFoundError:
+        pass
