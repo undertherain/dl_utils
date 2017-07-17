@@ -6,6 +6,7 @@ import numpy as np
 from scipy.ndimage.interpolation import rotate
 from scipy.ndimage.filters import gaussian_filter
 from skimage.transform import resize
+from scipy.ndimage.interpolation import zoom
 
 try:
     imp.find_module('cv2')
@@ -90,13 +91,22 @@ class ImageLoader:
         return res
 
     def random_rotate(self, img, axes=(0, 1)):
-        return self._flipper[np.random.randint(7)](img, axes)
+        rot_idx = np.random.randint(7)
+        return self._flipper[np.random.randint(7)](img, axes), True if rot_idx == 6 else False
 
     def random_scroll(self, img, axes=(0, 1)):
         return self._scroller[np.random.randint(2)](img, axes)
 
     def random_blur(self, img, axes=(0, 1), proba=0.2):
         return self._blurrer[1 if np.random.randint(int(1 / proba)) > 0 else 0](img, axes)
+
+    def random_zoom(self, img, axes=(0, 1), rot=False, low=0.5, high=1.0):
+        if rot:
+            high = 0.8
+        cur_low = round(np.random.uniform(low=low, high=high), 1)
+        zoom_size = [1, 1, 1]
+        zoom_size[axes[0]] = zoom_size[axes[1]] = cur_low
+        return zoom(img, zoom=tuple(zoom_size), order=1, mode='reflect')
 
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
