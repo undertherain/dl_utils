@@ -130,8 +130,19 @@ def main():
     print("testing data loader")
     il = ImageLoader()
     img = il.load_image("test_data/ireland.jpg")
-    img = il.resize(img, (64, 64))
-    img = il.random_rotate(img)
+    # img = il.mosaic_pad(img=img, axes=(1, 2))
+    # img = il.random_rotate(img=img, axes=(1, 2))
+    # img = il.center_crop(img=img, axes=(1, 2))
+    img = il.random_blur(img=img, axes=(1, 2), proba=1)
+    # img = il.resize(img, (64, 64))
+
     print(img.shape)
+    if HAS_OPENCV:
+        cv2.imwrite('outfile.jpg', img)
+    else:
+        scipy.misc.imsave('outfile.jpg', img)
     # todo: proper unit tests for different image formats
-    img = il.load_image("test_data/missing.jpg")
+    try:
+        img = il.load_image("test_data/missing.jpg")
+    except FileNotFoundError:
+        pass
