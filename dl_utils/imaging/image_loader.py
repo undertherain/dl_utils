@@ -14,7 +14,7 @@ except ImportError:
 else:
     HAS_OPENCV = True
     import cv2
-    
+
 try:
     imp.find_module('tifffile')
 except ImportError:
@@ -87,7 +87,7 @@ class ImageLoader:
         pad2 = max(0, pad2)
         res = np.lib.pad(img, ((0, pad1), (0, pad2), (0, 0)), 'constant', constant_values=0)
         return res
-        
+
     def random_rotate(self, img, axes=(0, 1)):
         return self._flipper[np.random.randint(7)](img, axes)
 
@@ -96,13 +96,13 @@ class ImageLoader:
 
     def random_blur(self, img, axes=(0, 1), proba=0.2):
         return self._blurrer[1 if np.random.randint(int(1 / proba)) > 0 else 0](img, axes)
-        
+
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path)
-        
+
         img_type = path.split('.')[-1]
-        
+
         if img_type in ['tif', 'tiff']:
             if HAS_TIFFFILE:
                 img = tiff.imread(path)
@@ -116,7 +116,7 @@ class ImageLoader:
                     img = cv2.imread(path, cv2.IMREAD_COLOR)
             else:
                 img = scipy.misc.imread(path, grey_scale)
-        
+
         return (img / float(np.iinfo(img.dtype).max)).astype(np.float32)
 
     def make_channels_first(self, img):
