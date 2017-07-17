@@ -139,7 +139,7 @@ def main():
     # img = il.mosaic_pad(img=img, axes=(1, 2))
     # img = il.random_rotate(img=img, axes=(1, 2))
     # img = il.center_crop(img=img, axes=(1, 2))
-    img = il.random_blur(img=img, axes=(1, 2), proba=1)
+    img = il.random_blur(img=img, axes=(0, 1), proba=1)
     # img = il.resize(img, (64, 64))
 
     print(img.shape)
