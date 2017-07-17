@@ -15,7 +15,7 @@ except ImportError:
 else:
     HAS_OPENCV = True
     import cv2
-    
+
 try:
     imp.find_module('tifffile')
 except ImportError:
@@ -28,7 +28,7 @@ else:
 
 
 class ImageLoader:
-    def __init__(self, roll_step=8):
+    def __init__(self, scroll_count=8):
         self._flipper = {0: lambda img, axes: img,
                          1: lambda img, axes: np.rot90(m=img, k=1, axes=axes),
                          2: lambda img, axes: np.rot90(m=img, k=2, axes=axes),
@@ -38,13 +38,13 @@ class ImageLoader:
                          6: lambda img, axes: rotate(np.rot90(m=img, k=np.random.randint(4), axes=axes),
                                                      angle=15, axes=axes)}
 
-        self._shifter = {0: lambda img, axes: np.roll(img, self._shift_space(img, axes[0]), axis=axes[0]),
-                         1: lambda img, axes: np.roll(img, self._shift_space(img, axes[1]), axis=axes[1])}
+        self._scroller = {0: lambda img, axes: np.roll(img, self._scroll_img(img, axes[0]), axis=axes[0]),
+                          1: lambda img, axes: np.roll(img, self._scroll_img(img, axes[1]), axis=axes[1])}
 
         self._blurrer = {0: lambda img, axes: self._blur_img(img, axes),
                          1: lambda img, axes: img}
 
-        self._roll_step = roll_step
+        self._scroll_count = scroll_count
 
     def center_crop(self, img, axes, new_shape=(64, 64)):
         old_shape = [img.shape[axes[0]], img.shape[axes[1]]]
@@ -71,8 +71,8 @@ class ImageLoader:
         sigma[idx] = pix
         return gaussian_filter(img, sigma=tuple(sigma))
 
-    def _shift_space(self, img, axes):
-        unit_shift = int(img.shape[axes] / self._roll_step)
+    def _scroll_img(self, img, axes):
+        unit_shift = int(img.shape[axes] / self._scroll_count)
         return unit_shift * np.random.randint(unit_shift)
 
     def resize(self, img, shape, axes=(0, 1), mode='reflect'):
@@ -87,22 +87,22 @@ class ImageLoader:
         pad2 = max(0, pad2)
         res = np.lib.pad(img, ((0, pad1), (0, pad2), (0, 0)), 'constant', constant_values=0)
         return res
-        
+
     def random_rotate(self, img, axes=(0, 1)):
         return self._flipper[np.random.randint(7)](img, axes)
 
-    def random_shift(self, img, axes=(0, 1)):
-        return self._shifter[np.random.randint(2)](img, axes)
+    def random_scroll(self, img, axes=(0, 1)):
+        return self._scroller[np.random.randint(2)](img, axes)
 
     def random_blur(self, img, axes=(0, 1), proba=0.2):
         return self._blurrer[1 if np.random.randint(int(1 / proba)) > 0 else 0](img, axes)
-        
+
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path)
-        
+
         img_type = path.split('.')[-1]
-        
+
         if img_type in ['tif', 'tiff']:
             if HAS_TIFFFILE:
                 img = tiff.imread(path)
@@ -116,7 +116,7 @@ class ImageLoader:
                     img = cv2.imread(path, cv2.IMREAD_COLOR)
             else:
                 img = scipy.misc.imread(path, grey_scale)
-        
+
         return (img / float(np.iinfo(img.dtype).max)).astype(np.float32)
 
     def make_channels_first(self, img):
