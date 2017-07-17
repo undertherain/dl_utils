@@ -75,10 +75,11 @@ class ImageLoader:
         unit_shift = int(img.shape[axes] / self._scroll_count)
         return unit_shift * np.random.randint(unit_shift)
 
-    def resize(self, img, shape, axes=(0, 1), mode='reflect'):
-        output_shape = list(img.shape)
-        output_shape[axes[0]], output_shape[axes[1]] = shape[0], shape[1]
-        return resize(img, output_shape=tuple(output_shape), mode=mode)
+    def resize(self, img, shape, interpolation=3):
+        if HAS_OPENCV:
+            return cv2.resize(img, shape, interpolation)
+        else:
+            return scipy.misc.imresize(img, shape)
 
     def pad(self, img, dim_max=5616):
         pad1 = dim_max - img.shape[0]
