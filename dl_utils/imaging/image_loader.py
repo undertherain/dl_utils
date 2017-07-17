@@ -3,8 +3,11 @@ import begin
 import errno
 import imp
 import numpy as np
+# from scipy.misc import imsave
 from scipy.ndimage.interpolation import rotate
 from scipy.ndimage.filters import gaussian_filter
+# from skimage.transform import resize
+from scipy.ndimage.interpolation import zoom
 
 try:
     imp.find_module('cv2')
@@ -27,7 +30,7 @@ else:
 
 
 class ImageLoader:
-    def __init__(self, roll_step=8):
+    def __init__(self, scroll_count=8):
         self._flipper = {0: lambda img, axes: img,
                          1: lambda img, axes: np.rot90(m=img, k=1, axes=axes),
                          2: lambda img, axes: np.rot90(m=img, k=2, axes=axes),
@@ -35,15 +38,15 @@ class ImageLoader:
                          4: lambda img, axes: np.flipud(img),
                          5: lambda img, axes: np.fliplr(img),
                          6: lambda img, axes: rotate(np.rot90(m=img, k=np.random.randint(4), axes=axes),
-                                                     angle=15, axes=axes)}
+                                                     angle=15, axes=axes, reshape=False)}
 
-        self._shifter = {0: lambda img, axes: np.roll(img, self._shift_space(img, axes[0]), axis=axes[0]),
-                         1: lambda img, axes: np.roll(img, self._shift_space(img, axes[1]), axis=axes[1])}
+        self._scroller = {0: lambda img, axes: np.roll(img, self._scroll_img(img, axes[0]), axis=axes[0]),
+                          1: lambda img, axes: np.roll(img, self._scroll_img(img, axes[1]), axis=axes[1])}
 
         self._blurrer = {0: lambda img, axes: self._blur_img(img, axes),
                          1: lambda img, axes: img}
 
-        self._roll_step = roll_step
+        self._scroll_count = scroll_count
 
     def center_crop(self, img, axes, new_shape=(64, 64)):
         old_shape = [img.shape[axes[0]], img.shape[axes[1]]]
@@ -70,8 +73,8 @@ class ImageLoader:
         sigma[idx] = pix
         return gaussian_filter(img, sigma=tuple(sigma))
 
-    def _shift_space(self, img, axes):
-        unit_shift = int(img.shape[axes] / self._roll_step)
+    def _scroll_img(self, img, axes):
+        unit_shift = int(img.shape[axes] / self._scroll_count)
         return unit_shift * np.random.randint(unit_shift)
 
     def resize(self, img, shape, interpolation=3):
@@ -89,13 +92,22 @@ class ImageLoader:
         return res
 
     def random_rotate(self, img, axes=(0, 1)):
-        return self._flipper[np.random.randint(7)](img, axes)
+        rot_idx = np.random.randint(7)
+        return self._flipper[np.random.randint(7)](img, axes), True if rot_idx == 6 else False
 
-    def random_shift(self, img, axes=(0, 1)):
-        return self._shifter[np.random.randint(2)](img, axes)
+    def random_scroll(self, img, axes=(0, 1)):
+        return self._scroller[np.random.randint(2)](img, axes)
 
     def random_blur(self, img, axes=(0, 1), proba=0.2):
         return self._blurrer[1 if np.random.randint(int(1 / proba)) > 0 else 0](img, axes)
+
+    def random_zoom(self, img, axes=(0, 1), rot=False, low=0.5, high=1.0):
+        if rot:
+            high = 0.8
+        cur_low = round(np.random.uniform(low=low, high=high), 1)
+        zoom_size = [1, 1, 1]
+        zoom_size[axes[0]] = zoom_size[axes[1]] = cur_low
+        return zoom(img, zoom=tuple(zoom_size), order=1, mode='reflect')
 
     def load_image(self, path, grey_scale=False):
         if os.path.isfile(path) is False:
@@ -147,8 +159,3 @@ def main():
         cv2.imwrite('outfile.jpg', img)
     else:
         scipy.misc.imsave('outfile.jpg', img)
-    # todo: proper unit tests for different image formats
-    try:
-        img = il.load_image("test_data/missing.jpg")
-    except FileNotFoundError:
-        pass
