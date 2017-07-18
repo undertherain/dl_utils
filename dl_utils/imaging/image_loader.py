@@ -3,10 +3,9 @@ import begin
 import errno
 import imp
 import numpy as np
-# from scipy.misc import imsave
+from scipy.misc import imsave
 from scipy.ndimage.interpolation import rotate
 from scipy.ndimage.filters import gaussian_filter
-# from skimage.transform import resize
 from scipy.ndimage.interpolation import zoom
 
 try:
@@ -135,7 +134,7 @@ class ImageLoader:
         if HAS_OPENCV:
             cv2.imwrite(path, img)
         else:
-            scipy.misc.imsave(path, img)
+            imsave(path, img)
 
     def make_channels_first(self, img):
         axes = img.shape
