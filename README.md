@@ -11,7 +11,7 @@ For now you can just download files and place them where you need.
 
 Aleksandr Drozd
 
-Maxim Shpakovich 
+Maksym Shpakovych 
 
 ## License
 
