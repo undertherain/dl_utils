@@ -132,7 +132,7 @@ class ImageLoader:
 
     def save_image(self, img, path):
         if HAS_OPENCV:
-            cv2.imwrite(path, img)
+            cv2.imwrite(path, img * 255)
         else:
             imsave(path, img)
 
