@@ -24,7 +24,7 @@ class Tests(unittest.TestCase):
 
     def test_rotate(self):
         img = il.load_image(path_img)
-        img, rot = il.random_rotate(img=img, axes=(0, 1))
+        img, _ = il.random_rotate(img=img, axes=(0, 1))
         il.save_image(img, "/tmp/img_rotated.jpg")
 
     def test_pad(self):
