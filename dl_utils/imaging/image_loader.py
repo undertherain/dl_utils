@@ -30,14 +30,14 @@ else:
 
 class ImageLoader:
     def __init__(self, scroll_count=8):
-        self._flipper = {0: lambda img, axes: img,
-                         1: lambda img, axes: np.rot90(m=img, k=1, axes=axes),
-                         2: lambda img, axes: np.rot90(m=img, k=2, axes=axes),
-                         3: lambda img, axes: np.rot90(m=img, k=3, axes=axes),
-                         4: lambda img, axes: np.flipud(img),
-                         5: lambda img, axes: np.fliplr(img),
-                         6: lambda img, axes: rotate(np.rot90(m=img, k=np.random.randint(4), axes=axes),
-                                                     angle=15, axes=axes, reshape=False)}
+        self._flipper = {0: lambda img, axes, angle: img,
+                         1: lambda img, axes, angle: np.rot90(m=img, k=1, axes=axes),
+                         2: lambda img, axes, angle: np.rot90(m=img, k=2, axes=axes),
+                         3: lambda img, axes, angle: np.rot90(m=img, k=3, axes=axes),
+                         4: lambda img, axes, angle: np.flipud(img),
+                         5: lambda img, axes, angle: np.fliplr(img),
+                         6: lambda img, axes, angle: rotate(np.rot90(m=img, k=np.random.randint(4), axes=axes),
+                                                            angle=angle, axes=axes, reshape=False)}
 
         self._scroller = {0: lambda img, axes: np.roll(img, self._scroll_img(img, axes[0]), axis=axes[0]),
                           1: lambda img, axes: np.roll(img, self._scroll_img(img, axes[1]), axis=axes[1])}
@@ -90,9 +90,9 @@ class ImageLoader:
         res = np.lib.pad(img, ((0, pad1), (0, pad2), (0, 0)), 'constant', constant_values=0)
         return res
 
-    def random_rotate(self, img, axes=(0, 1)):
+    def random_rotate(self, img, axes=(0, 1), angle=15):
         rot_idx = np.random.randint(7)
-        return self._flipper[np.random.randint(7)](img, axes), True if rot_idx == 6 else False
+        return self._flipper[rot_idx](img, axes, angle), True if rot_idx == 6 else False
 
     def random_scroll(self, img, axes=(0, 1)):
         return self._scroller[np.random.randint(2)](img, axes)
