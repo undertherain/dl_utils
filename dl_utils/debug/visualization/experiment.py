@@ -54,6 +54,7 @@ class experiment_chainer(experiment):
         log = json.loads(str_log)
         self.history = {}
         self.history["loss"] = np.array([i["main/loss"] for i in log])
+        self.history["loss"] = np.nan_to_num(self.history["loss"])
         # self.history["loss"] = np.clip(self.history["loss"],a_min=0,a_max=5)
         if "main/accuracy" in log[0]:
             self.history["acc"] = np.array([i["main/accuracy"] for i in log])
